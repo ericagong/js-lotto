@@ -29,11 +29,30 @@ const $restartButton = $("#restart-button");
 
 let lottos = [];
 
+// domain based controller logics
 const issueLottos = (purchasingPrice) => {
   const { issueLottoOf } = createLottoMachine();
   lottos = issueLottoOf(purchasingPrice);
 };
 
+const getLottoStatistics = (winningNumbers, bonusNumber) => {
+  const lottoWithWinningNumber = Lotto.of(winningNumbers);
+  const winningLotto = WinningLotto.from(lottoWithWinningNumber, bonusNumber);
+
+  let ranks = [];
+  lottos.forEach((targetLotto) => {
+    ranks.push(winningLotto.getRank(targetLotto));
+  });
+
+  const { countRanks, calculateRevenue } = createStatistics();
+  const rankCount = countRanks(ranks);
+  const winningRankCount = rankCount.slice(0, rankCount.length - 1).reverse();
+  const revenueRate = calculateRevenue(ranks);
+
+  return [winningRankCount, revenueRate];
+};
+
+// view logics
 const renderIssuedLottosView = () => {
   $lottosCount.innerText = `총 ${lottos.length}개를 구매하였습니다.`;
   const issuedLottosContent = lottos
@@ -60,10 +79,43 @@ const resetIssuedLottosView = () => {
   $winningLottoForm.classList.add("d-none");
 };
 
+const toggleLottoNumbersView = () => {
+  $lottosView.classList.toggle("flex-wrap");
+  $lottosView.classList.toggle("flex-col");
+  const $$lottoNumbers = $$(".lotto-numbers");
+  $$lottoNumbers.forEach(($lottoNumber) => {
+    $lottoNumber.classList.toggle("d-none");
+  });
+};
+
+const resetWinningNumbersInputView = () => {
+  $$winningNumbers.forEach(($winningNumber) => ($winningNumber.value = ""));
+};
+
+const resetBonusNumberInputView = () => {
+  $bonusNumber.value = "";
+};
+
+const onModalShow = () => {
+  $modal.classList.add("open");
+};
+
+const onModalClose = () => {
+  $modal.classList.remove("open");
+};
+
+const renderStatisticsView = (winningRankCount, revenueRate) => {
+  Array.from($$rankCounts).forEach(($rankCount, idx) => {
+    $rankCount.innerText = `${winningRankCount[idx]}개`;
+  });
+  $totalRevenue.innerText = `당신의 총 수익률은 ${revenueRate}%입니다.`;
+};
+
 const alertError = (error, extraMessage = "") => {
   window.alert(`${extraMessage}\n ${error.message}`);
 };
 
+// eventHandlers
 $issueLottoForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const purchasingPrice = convertToMatchingDataType(
@@ -80,56 +132,7 @@ $issueLottoForm.addEventListener("submit", (event) => {
   }
 });
 
-const toggleLottoNumbersView = () => {
-  $lottosView.classList.toggle("flex-wrap");
-  $lottosView.classList.toggle("flex-col");
-  const $$lottoNumbers = $$(".lotto-numbers");
-  $$lottoNumbers.forEach(($lottoNumber) => {
-    $lottoNumber.classList.toggle("d-none");
-  });
-};
-
 $lottoNumbersToggleButton.addEventListener("click", toggleLottoNumbersView);
-
-const onModalShow = () => {
-  $modal.classList.add("open");
-};
-
-const onModalClose = () => {
-  $modal.classList.remove("open");
-};
-
-const getLottoStatistics = (winningNumbers, bonusNumber) => {
-  const lottoWithWinningNumber = Lotto.of(winningNumbers);
-  const winningLotto = WinningLotto.from(lottoWithWinningNumber, bonusNumber);
-
-  let ranks = [];
-  lottos.forEach((targetLotto) => {
-    ranks.push(winningLotto.getRank(targetLotto));
-  });
-
-  const { countRanks, calculateRevenue } = createStatistics();
-  const rankCount = countRanks(ranks);
-  const winningRankCount = rankCount.slice(0, rankCount.length - 1).reverse();
-  const revenueRate = calculateRevenue(ranks);
-
-  return [winningRankCount, revenueRate];
-};
-
-const renderStatisticsView = (winningRankCount, revenueRate) => {
-  Array.from($$rankCounts).forEach(($rankCount, idx) => {
-    $rankCount.innerText = `${winningRankCount[idx]}개`;
-  });
-  $totalRevenue.innerText = `당신의 총 수익률은 ${revenueRate}%입니다.`;
-};
-
-const resetWinningNumbersInputView = () => {
-  $$winningNumbers.forEach(($winningNumber) => ($winningNumber.value = ""));
-};
-
-const resetBonusNumberInputView = () => {
-  $bonusNumber.value = "";
-};
 
 $showResultButton.addEventListener("click", () => {
   const winningNumbers = Array.from($$winningNumbers).map(($winningNumber) =>
