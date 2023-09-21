@@ -10,7 +10,9 @@ const $issueLottoForm = $("#issue-lotto-form");
 const $purchasingPriceInput = $("#purchasing-price-input");
 const $lottosCount = $("#lottos-count");
 const $lottosView = $("#lottos-view");
+const $switch = $(".switch");
 const $lottoNumbersToggleButton = $("#lotto-numbers-toggle-button");
+const $winningLottoForm = $("#winning-lotto-form");
 const $showResultButton = $(".open-result-modal-button");
 const $modalClose = $(".modal-close");
 const $modal = $(".modal");
@@ -30,17 +32,20 @@ $issueLottoForm.addEventListener("submit", (event) => {
       .map(
         (lotto) => `
 				<span class="mx-1 text-4xl">🎟️ 
-					<span class="d-none text-base lotto-numbers">${lotto.display().join(", ")}
+					<span class="d-none text-base lotto-numbers">
+						${lotto.display().join(", ")}
 					</span>
 				</span>`
       )
       .join("");
     $lottosView.innerHTML = issuedLottosContent;
+    $switch.classList.remove("d-none");
   } catch (error) {
     window.alert(error.message + "구입 금액을 다시 입력해주세요.");
     $purchasingPriceInput.value = "";
     $lottosCount.innerText = "";
     $lottosView.innerHTML = "";
+    $switch.classList.add("d-none");
   }
 });
 
