@@ -25,6 +25,7 @@ const $modalClose = $(".modal-close");
 const $$rankCounts = $$(".rank-count");
 const $totalRevenue = $("#total-revenue");
 const $showResultButton = $(".open-result-modal-button");
+const $restartButton = $("#restart-button");
 
 let lottos = [];
 
@@ -115,3 +116,15 @@ $showResultButton.addEventListener("click", () => {
 });
 
 $modalClose.addEventListener("click", onModalClose);
+
+$restartButton.addEventListener("click", () => {
+  lottos = [];
+  onModalClose();
+  $purchasingPriceInput.value = "";
+  $lottosCount.innerText = "";
+  $lottosView.innerHTML = "";
+  $switch.classList.add("d-none");
+  $winningLottoForm.classList.add("d-none");
+  $$winningNumbers.forEach(($winningNumber) => ($winningNumber.value = ""));
+  $bonusNumber.value = "";
+});
