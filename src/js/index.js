@@ -29,46 +29,67 @@ const $restartButton = $("#restart-button");
 
 let lottos = [];
 
-$issueLottoForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const purchasingPrice = convertToMatchingDataType(
-    $purchasingPriceInput.value
-  );
-  try {
-    const { issueLottoOf } = createLottoMachine();
-    lottos = issueLottoOf(purchasingPrice);
-    $lottosCount.innerText = `총 ${lottos.length}개를 구매하였습니다.`;
-    const issuedLottosContent = lottos
-      .map(
-        (lotto) => `
+const issueLottos = (purchasingPrice) => {
+  const { issueLottoOf } = createLottoMachine();
+  lottos = issueLottoOf(purchasingPrice);
+};
+
+const renderIssuedLottosView = () => {
+  $lottosCount.innerText = `총 ${lottos.length}개를 구매하였습니다.`;
+  const issuedLottosContent = lottos
+    .map(
+      (lotto) => `
 				<span class="mx-1 text-4xl">🎟️ 
 					<span class="d-none text-base lotto-numbers">
 						${lotto.display().join(", ")}
 					</span>
 				</span>`
-      )
-      .join("");
-    $lottosView.innerHTML = issuedLottosContent;
-    $switch.classList.remove("d-none");
-    $winningLottoForm.classList.remove("d-none");
+    )
+    .join("");
+  $lottosView.innerHTML = issuedLottosContent;
+  $switch.classList.remove("d-none");
+  $winningLottoForm.classList.remove("d-none");
+};
+
+const resetIssuedLottosView = () => {
+  $purchasingPriceInput.value = "";
+  $lottosCount.innerText = "";
+  $lottosView.innerHTML = "";
+  $switch.classList.add("d-none");
+  $lottoNumbersToggleButton.checked = false;
+  $winningLottoForm.classList.add("d-none");
+};
+
+const alertError = (error, extraMessage = "") => {
+  window.alert(`${extraMessage}\n ${error.message}`);
+};
+
+$issueLottoForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const purchasingPrice = convertToMatchingDataType(
+    $purchasingPriceInput.value
+  );
+
+  try {
+    issueLottos(purchasingPrice);
+    renderIssuedLottosView();
   } catch (error) {
-    window.alert(error.message + "구입 금액을 다시 입력해주세요.");
-    $purchasingPriceInput.value = "";
-    $lottosCount.innerText = "";
-    $lottosView.innerHTML = "";
-    $switch.classList.add("d-none");
-    $winningLottoForm.classList.add("d-none");
+    const MESSAGE = "구입 금액을 다시 입력해주세요.";
+    alertError(error, MESSAGE);
+    resetIssuedLottosView();
   }
 });
 
-$lottoNumbersToggleButton.addEventListener("click", () => {
+const toggleLottoNumbersView = () => {
   $lottosView.classList.toggle("flex-wrap");
   $lottosView.classList.toggle("flex-col");
   const $$lottoNumbers = $$(".lotto-numbers");
   $$lottoNumbers.forEach(($lottoNumber) => {
     $lottoNumber.classList.toggle("d-none");
   });
-});
+};
+
+$lottoNumbersToggleButton.addEventListener("click", toggleLottoNumbersView);
 
 const onModalShow = () => {
   $modal.classList.add("open");
@@ -78,6 +99,38 @@ const onModalClose = () => {
   $modal.classList.remove("open");
 };
 
+const getLottoStatistics = (winningNumbers, bonusNumber) => {
+  const lottoWithWinningNumber = Lotto.of(winningNumbers);
+  const winningLotto = WinningLotto.from(lottoWithWinningNumber, bonusNumber);
+
+  let ranks = [];
+  lottos.forEach((targetLotto) => {
+    ranks.push(winningLotto.getRank(targetLotto));
+  });
+
+  const { countRanks, calculateRevenue } = createStatistics();
+  const rankCount = countRanks(ranks);
+  const winningRankCount = rankCount.slice(0, rankCount.length - 1).reverse();
+  const revenueRate = calculateRevenue(ranks);
+
+  return [winningRankCount, revenueRate];
+};
+
+const renderStatisticsView = (winningRankCount, revenueRate) => {
+  Array.from($$rankCounts).forEach(($rankCount, idx) => {
+    $rankCount.innerText = `${winningRankCount[idx]}개`;
+  });
+  $totalRevenue.innerText = `당신의 총 수익률은 ${revenueRate}%입니다.`;
+};
+
+const resetWinningNumbersInputView = () => {
+  $$winningNumbers.forEach(($winningNumber) => ($winningNumber.value = ""));
+};
+
+const resetBonusNumberInputView = () => {
+  $bonusNumber.value = "";
+};
+
 $showResultButton.addEventListener("click", () => {
   const winningNumbers = Array.from($$winningNumbers).map(($winningNumber) =>
     convertToMatchingDataType($winningNumber.value)
@@ -85,32 +138,21 @@ $showResultButton.addEventListener("click", () => {
 
   const bonusNumber = convertToMatchingDataType($bonusNumber.value);
   try {
-    const lottoWithWinningNumber = Lotto.of(winningNumbers);
-    const winningLotto = WinningLotto.from(lottoWithWinningNumber, bonusNumber);
-
-    let ranks = [];
-    lottos.forEach((targetLotto) => {
-      ranks.push(winningLotto.getRank(targetLotto));
-    });
-
-    const { countRanks, calculateRevenue } = createStatistics();
-    const rankCount = countRanks(ranks);
-    const winningRankCount = rankCount.slice(0, rankCount.length - 1).reverse();
-    const revenueRate = calculateRevenue(ranks);
-
-    Array.from($$rankCounts).forEach(($rankCount, idx) => {
-      $rankCount.innerText = `${winningRankCount[idx]}개`;
-    });
-    $totalRevenue.innerText = `당신의 총 수익률은 ${revenueRate}%입니다.`;
+    const [winningRankCount, revenueRate] = getLottoStatistics(
+      winningNumbers,
+      bonusNumber
+    );
+    renderStatisticsView(winningRankCount, revenueRate);
 
     onModalShow();
   } catch (error) {
-    window.alert(error.message);
     if (error instanceof LottoNumbersError) {
-      $$winningNumbers.forEach(($winningNumber) => ($winningNumber.value = ""));
+      alertError(error, "당첨 번호 6자리를 다시 입력해주세요.");
+      resetWinningNumbersInputView();
     }
     if (error instanceof BonusNumberError) {
-      $bonusNumber.value = "";
+      alertError(error, "보너스 번호를 다시 입력해주세요.");
+      resetBonusNumberInputView();
     }
   }
 });
@@ -120,11 +162,7 @@ $modalClose.addEventListener("click", onModalClose);
 $restartButton.addEventListener("click", () => {
   lottos = [];
   onModalClose();
-  $purchasingPriceInput.value = "";
-  $lottosCount.innerText = "";
-  $lottosView.innerHTML = "";
-  $switch.classList.add("d-none");
-  $winningLottoForm.classList.add("d-none");
-  $$winningNumbers.forEach(($winningNumber) => ($winningNumber.value = ""));
-  $bonusNumber.value = "";
+  resetIssuedLottosView();
+  resetWinningNumbersInputView();
+  resetBonusNumberInputView();
 });
