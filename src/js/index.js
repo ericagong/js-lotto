@@ -4,10 +4,16 @@ import createLottoMachine from "../js/domain/models/LottoMachine/createLottoMach
 const { convertToMatchingDataType } = createInputConverter();
 
 const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => document.querySelectorAll(selector);
+
 const $issueLottoForm = $("#issue-lotto-form");
 const $purchasingPriceInput = $("#purchasing-price-input");
 const $lottosCount = $("#lottos-count");
 const $lottosView = $("#lottos-view");
+const $lottoNumbersToggleButton = $("#lotto-numbers-toggle-button");
+const $showResultButton = $(".open-result-modal-button");
+const $modalClose = $(".modal-close");
+const $modal = $(".modal");
 
 let lottos;
 
@@ -21,7 +27,13 @@ $issueLottoForm.addEventListener("submit", (event) => {
     lottos = issueLottoOf(purchasingPrice);
     $lottosCount.innerText = `총 ${lottos.length}개를 구매하였습니다.`;
     const issuedLottosContent = lottos
-      .map((lotto) => `<span class="mx-1 text-4xl">🎟️ </span>`)
+      .map(
+        (lotto) => `
+				<span class="mx-1 text-4xl">🎟️ 
+					<span class="d-none text-base lotto-numbers">${lotto.display().join(", ")}
+					</span>
+				</span>`
+      )
       .join("");
     $lottosView.innerHTML = issuedLottosContent;
   } catch (error) {
@@ -32,12 +44,14 @@ $issueLottoForm.addEventListener("submit", (event) => {
   }
 });
 
-const $showResultButton = document.querySelector(".open-result-modal-button");
-const $modalClose = document.querySelector(".modal-close");
-const $modal = document.querySelector(".modal");
-const $lottoNumbersToggleButton = document.querySelector(
-  ".lotto-numbers-toggle-button"
-);
+$lottoNumbersToggleButton.addEventListener("click", () => {
+  $lottosView.classList.toggle("flex-wrap");
+  $lottosView.classList.toggle("flex-col");
+  const $$lottoNumbers = $$(".lotto-numbers");
+  $$lottoNumbers.forEach(($lottoNumber) => {
+    $lottoNumber.classList.toggle("d-none");
+  });
+});
 
 const onModalShow = () => {
   $modal.classList.add("open");

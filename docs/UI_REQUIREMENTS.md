@@ -11,7 +11,13 @@
 [feature2] 번호 보기 토글 이벤트
 
 - 번호 보기 on 시, 로또 번호 나열
+  V 로또 번호 Element display: block 처리
+  V 로또 view flex-direction: column 처리
+  V 로또 view flex-wrap: nowrap(Default) 처리
 - 번호 보기 off 시, 로또 번호 숨기기
+  V 로또 번호 Element display: block(Default) 처리
+  V 로또 view flex-direction: row(Default) 처리
+  V 로또 view flex-wrap: wrap 처리
 
 [feature3] 결과 확인하기 버튼 이벤트
 
