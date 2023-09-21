@@ -2,14 +2,14 @@ import { RankNotNumberError, RankOutOfRangeError } from "./errors.js";
 import { RANKS } from "../../constants.js";
 
 export default class Rank {
-  PRIZES = {
+  PRIZES = Object.freeze({
     [RANKS.FIRST]: 2_000_000_000,
     [RANKS.SECOND]: 30_000_000,
     [RANKS.THIRD]: 1_500_000,
     [RANKS.FOURTH]: 50_000,
     [RANKS.FIFTH]: 5_000,
     [RANKS.NONE]: 0,
-  };
+  });
   RANK_LOWER_BOUND = RANKS.FIRST;
   RANK_UPPER_BOUND = RANKS.NONE;
   #rank;

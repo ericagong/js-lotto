@@ -1,37 +1,8 @@
-import readline from "readline";
+import readlineInterface from "./readlineInterface.js";
+import createInputConverter from "./createInputConverter.js";
 
-const readlineInterface = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
+const { convertToMatchingDataType, convertToArray } = createInputConverter();
 export default class View {
-  #convertToMatchingDataType(input) {
-    if (input === "null") {
-      return null;
-    }
-    if (input === "undefined") {
-      return undefined;
-    }
-    if (/^-?\d+(\.\d+)?$/.test(input)) {
-      // 숫자 변환
-      return parseFloat(input);
-    }
-
-    try {
-      return JSON.parse(input);
-    } catch (error) {
-      // 그대로 반환 (문자열 유지)
-      return input;
-    }
-  }
-
-  #convertToArray(input) {
-    return input
-      .split(",")
-      .map((element) => this.#convertToMatchingDataType(element));
-  }
-
   printLine(line) {
     console.log(line);
   }
@@ -41,8 +12,7 @@ export default class View {
       readlineInterface.question("> 구입금액을 입력해 주세요. ", resolve)
     );
 
-    const purchasingPrice =
-      this.#convertToMatchingDataType(purchasingPriceInput);
+    const purchasingPrice = convertToMatchingDataType(purchasingPriceInput);
     cbFunc(purchasingPrice);
   }
 
@@ -51,7 +21,7 @@ export default class View {
       readlineInterface.question("> 당첨 번호를 입력해 주세요. ", resolve)
     );
 
-    const winningNumbers = this.#convertToArray(winningNumbersInput);
+    const winningNumbers = convertToArray(winningNumbersInput);
     cbFunc(winningNumbers);
 
     this.printLine("");
@@ -61,7 +31,7 @@ export default class View {
     const bonusNumberInput = await new Promise((resolve) =>
       readlineInterface.question("> 보너스 번호를 입력해 주세요. ", resolve)
     );
-    const bonusNumber = this.#convertToMatchingDataType(bonusNumberInput);
+    const bonusNumber = convertToMatchingDataType(bonusNumberInput);
     cbFunc(bonusNumber);
 
     this.printLine("");
@@ -71,16 +41,16 @@ export default class View {
     const retryInput = await new Promise((resolve) =>
       readlineInterface.question("> 다시 시작하시겠습니까? (y/n) ", resolve)
     );
-    const retry = this.#convertToMatchingDataType(retryInput);
+    const retry = convertToMatchingDataType(retryInput);
     cbFunc(retry);
 
     this.printLine("");
   }
 
   printStatistics(rankCount, revenueRate) {
-    // ranks: [1, 2, 3, 4, 5]
-    const matchCounts = [6, 5, 5, 4, 3];
-    const prizes = [
+    // RANKS: [1, 2, 3, 4, 5]
+    const MATCH_COUNTS = [6, 5, 5, 4, 3];
+    const PRIZES = [
       "2,000,000,000",
       "30,000,000",
       "1,5000,000",
@@ -88,13 +58,13 @@ export default class View {
       "5,000",
     ];
 
-    const ranks = [];
     const winningRankCount = rankCount.slice(0, rankCount.length - 1);
-    winningRankCount.forEach((count, idx) => {
+
+    const ranks = winningRankCount.reduce((acc, count, idx) => {
       const extraInfo = idx === 2 ? ", 보너스 볼 일치" : "";
-      const summary = `${matchCounts[idx]}개 일치${extraInfo} (${prizes[idx]}원) - ${count}개`;
-      ranks.push(summary);
-    });
+      const summary = `${MATCH_COUNTS[idx]}개 일치${extraInfo} (${PRIZES[idx]}원) - ${count}개`;
+      return acc.concat(summary);
+    }, []);
 
     const statistics = ranks.reverse();
     statistics.push(`총 수익률은 ${revenueRate}%입니다.`);

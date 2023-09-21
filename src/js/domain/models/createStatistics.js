@@ -1,6 +1,9 @@
 import { RANKS, LOTTO_UNIT_PRICE } from "../constants.js";
 
 const createStatistics = () => {
+  const DECIMAL_POINT = 2;
+  const REGEX_NUMERIC = /.\d+0/;
+
   const countRanks = (ranks) => {
     const rankCounts = new Map([
       [RANKS.FIRST, 0],
@@ -22,21 +25,17 @@ const createStatistics = () => {
   const roundToSecondDecimalPoint = (number) => {
     if (Number.isInteger(number)) return number.toString();
 
-    const DECIMAL_POINT = 2;
     const formatted = number.toFixed(DECIMAL_POINT);
 
-    const endRegExp = /.\d+0/;
-    return endRegExp.test(formatted) ? formatted.slice(0, -1) : formatted;
+    return REGEX_NUMERIC.test(formatted) ? formatted.slice(0, -1) : formatted;
   };
 
   const calculateRevenue = (ranks) => {
-    let totalRevenue = 0;
-
     const totalPurchased = LOTTO_UNIT_PRICE * ranks.length;
 
-    ranks.forEach((rank) => {
-      totalRevenue += rank.getPrize();
-    });
+    const totalRevenue = ranks.reduce((acc, rank) => {
+      return acc + rank.getPrize();
+    }, 0);
 
     const revenueRate = (totalRevenue / totalPurchased) * 100;
     return roundToSecondDecimalPoint(revenueRate);

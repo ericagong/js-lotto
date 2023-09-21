@@ -25,8 +25,9 @@ export default class Lotto {
   }
 
   #validateLottoNumbers(lottoNumbers) {
-    if (!Array.isArray(lottoNumbers)) throw new LottoNumbersNotArrayError();
-    if (lottoNumbers.length !== LOTTO_DIGITS)
+    if (this.#lottoNumbersNotArray(lottoNumbers))
+      throw new LottoNumbersNotArrayError();
+    if (this.#LottoNumbersLengthNotSix(lottoNumbers))
       throw new LottoNumbersLengthNotSixError();
     if (this.#hasNotNumberLottoNumbers(lottoNumbers))
       throw new LottoNumberNotNumberError();
@@ -34,6 +35,14 @@ export default class Lotto {
       throw new LottoNumberOutOfRangeError();
     if (this.#hasDuplicatedLottoNumbers(lottoNumbers))
       throw new LottoNumberDuplicatedError();
+  }
+
+  #lottoNumbersNotArray(lottoNumbers) {
+    return !Array.isArray(lottoNumbers);
+  }
+
+  #LottoNumbersLengthNotSix(lottoNumbers) {
+    return lottoNumbers.length !== LOTTO_DIGITS;
   }
 
   #hasNotNumberLottoNumbers(lottoNumbers) {

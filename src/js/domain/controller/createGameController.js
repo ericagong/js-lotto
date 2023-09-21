@@ -6,7 +6,7 @@ import { BonusNumberError } from "../models/WinningLotto/errors.js";
 import { RetryError } from "../models/LottoPlatform/errors.js";
 
 const createGameController = () => {
-  let view = new View();
+  const view = new View();
   let lottos;
   let winningLotto;
 
@@ -15,7 +15,9 @@ const createGameController = () => {
 
   const displayIssuedLottos = (lottos) => {
     view.printLine(`${lottos.length}개를 구매했습니다.`);
-    lottos.forEach((targetLotto) => view.printLine(targetLotto.display()));
+    lottos.forEach((targetLotto) =>
+      view.printLine(`[${targetLotto.display().join(", ")}]`)
+    );
     view.printLine("");
   };
 
@@ -51,6 +53,7 @@ const createGameController = () => {
           runUntilFinish();
           break;
         case "n":
+          view.close();
           process.exit();
         default:
           throw new RetryError();

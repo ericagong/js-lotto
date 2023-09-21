@@ -17,10 +17,10 @@ const createLottoPlatform = () => {
   const getRanks = (lottoWithWinningNumber, bonusNumber, lottos) => {
     const winningLotto = WinningLotto.from(lottoWithWinningNumber, bonusNumber);
 
-    let ranks = [];
-    lottos.forEach((targetLotto) => {
-      ranks.push(winningLotto.getRank(targetLotto));
-    });
+    const ranks = lottos.reduce((acc, targetLotto) => {
+      return acc.concat(winningLotto.getRank(targetLotto));
+    }, []);
+
     return ranks;
   };
 

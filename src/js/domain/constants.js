@@ -3,11 +3,11 @@ export const LOTTO_LOWER_BOUND = 1;
 export const LOTTO_UPPER_BOUND = 45;
 export const LOTTO_UNIT_PRICE = 1_000;
 
-export const RANKS = {
+export const RANKS = Object.freeze({
   FIRST: 1,
   SECOND: 2,
   THIRD: 3,
   FOURTH: 4,
   FIFTH: 5,
   NONE: 6,
-};
+});

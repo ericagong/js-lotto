@@ -47,7 +47,7 @@ export default class WinningLotto {
         return RANKS.FIRST;
       case 5:
         if (isBonusMatch) return RANKS.SECOND;
-        return RANKS.SECOND;
+        return RANKS.THIRD;
       case 4:
         return RANKS.FOURTH;
       case 3:
