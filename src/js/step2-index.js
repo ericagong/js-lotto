@@ -1,4 +1,4 @@
-import LottoPlatform from "./domain/controller/LottoPlatform.js";
+import createGameController from "./domain/controller/createGameController.js";
 
-const lottoPlatform = new LottoPlatform();
-lottoPlatform.runUntilFinish();
+const { runUntilFinish } = createGameController();
+runUntilFinish();

@@ -1,4 +1,4 @@
-import ValidationError from "../../ValidationError.js";
+import ValidationError from "../ValidationError.js";
 
 export class RankNotNumberError extends ValidationError {
   static MESSAGE = "순위는 숫자여야합니다.";

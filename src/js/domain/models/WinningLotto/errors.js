@@ -1,4 +1,4 @@
-import ValidationError from "../../ValidationError.js";
+import ValidationError from "../ValidationError.js";
 
 export class LottoIsNotLottoInstanceError extends ValidationError {
   static ERROR_TYPE = " [WinningLotto Error] ";

@@ -1,4 +1,4 @@
-import ValidationError from "../models/ValidationError.js";
+import ValidationError from "../ValidationError.js";
 
 export class RetryError extends ValidationError {
   static ERROR_TYPE = " [Retry Error] ";
